@@ -1,0 +1,8 @@
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/SqlInjectionFalsePositives.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/aibom/AiBomAndPromptSafety.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/cbom/CbomAuditCases.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/XssFalsePositives.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/CommandInjectionFalsePositives.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/PathTraversalFalsePositives.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/DeserializationFalsePositives.java
+/home/namlabsthinkpad/nathir-gitlab/java-security-benchmark/src/main/java/com/benchmark/falsepositives/sast/CryptoFalsePositives.java
