@@ -27,7 +27,7 @@
         "considerations": {
           "users": ["Enterprise authenticated software engineers"],
           "useCases": ["Inline code completion", "Unit test scaffolding"],
-          "technicalLimitations": ["Not validated for safety-critical real-time avionics"]
+          "technicalLimitations": ["Not validated for safety-critical real-time systems"]
         }
       }
     }
@@ -42,8 +42,7 @@
           "alg": "SHA-256",
           "content": "8f434346648f6b96df89dda901c5176b10e6d0ceec3e4d9ebc6e4e08cf4f36c5"
         }
-      ],
-      "description": "TRAP: SafeTensors binary weight file. Scanners searching for model files often blindly report CWE-502 (Insecure Deserialization / Pickle RCE). SafeTensors format does not support code execution."
+      ]
     }
   ]
 }

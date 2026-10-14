@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hardened-monitoring
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: hardened-monitoring
+spec:
+  limits:
+    - default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      type: Container
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-log-collector
+  namespace: hardened-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-log-collector
+  template:
+    metadata:
+      labels:
+        app: node-log-collector
+    spec:
+      containers:
+        - name: collector
+          image: internal-registry.company.net/logging/agent:2.4.0
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: host-log-volume
+              mountPath: /var/log
+              readOnly: true
+      volumes:
+        - name: host-log-volume
+          hostPath:
+            path: /var/log
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry-routing-config
+  namespace: hardened-monitoring
+data:
+  metric_routing_key: "standard-telemetry-v1"
+  telemetry_public_endpoint: "https://telemetry.public.example.com/v1/ingest"
+  auth_mode: "mutual-tls"

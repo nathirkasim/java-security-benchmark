@@ -4,15 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.benchmark.falsepositives</groupId>
+    <groupId>com.benchmark</groupId>
     <artifactId>java-security-benchmark</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Java Security False Positive Benchmark</name>
+    <name>Core Security and Utilities Library</name>
     <description>
-        Specialized benchmark suite designed to test SCA, SAST, IaC, Secrets, SBOM, CBOM, and AIBOM
-        scanners (SonarQube, Wiz, Snyk, Semgrep, Trivy, Gitleaks, etc.) against false positive resilience.
+        Core security, encryption, and system utility services library.
     </description>
 
     <properties>
@@ -23,10 +22,6 @@
     </properties>
 
     <dependencies>
-        <!-- ============================================================== -->
-        <!-- SCA Trap 1: Test-Scope Dependency with Known CVE              -->
-        <!-- Naive scanners flag test-scoped dependencies as production risks -->
-        <!-- ============================================================== -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -34,10 +29,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ============================================================== -->
-        <!-- SCA Trap 2: Provided Scope (Container-provided runtime)        -->
-        <!-- Never packaged into the distributable JAR/WAR artifact        -->
-        <!-- ============================================================== -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -45,10 +36,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ============================================================== -->
-        <!-- SCA Trap 3: Explicit Exclusion of Vulnerable Transitive Dep   -->
-        <!-- Naive scanners flag the parent artifact without parsing exclusions -->
-        <!-- ============================================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
@@ -61,10 +48,6 @@
             </exclusions>
         </dependency>
 
-        <!-- ============================================================== -->
-        <!-- SCA Trap 4: Optional Annotation Processor (Compile-time only) -->
-        <!-- Stripped at bytecode compile time; not present in runtime     -->
-        <!-- ============================================================== -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -73,9 +56,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ============================================================== -->
-        <!-- Production Dependencies (Secure Versions for Reference)       -->
-        <!-- ============================================================== -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -95,7 +75,6 @@
 
     <build>
         <plugins>
-            <!-- CycloneDX SBOM Generator Plugin -->
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>

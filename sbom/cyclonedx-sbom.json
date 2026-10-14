@@ -8,7 +8,7 @@
     "timestamp": "2026-10-14T12:00:00Z",
     "component": {
       "type": "application",
-      "group": "com.benchmark.falsepositives",
+      "group": "com.benchmark",
       "name": "java-security-benchmark",
       "version": "1.0.0"
     }
@@ -20,8 +20,7 @@
       "name": "junit",
       "version": "4.12",
       "purl": "pkg:maven/junit/junit@4.12",
-      "scope": "excluded",
-      "description": "TRAP: Test-scope only library. Vulnerability analyzers mapping CVE-2020-15250 should not flag runtime deployment risk."
+      "scope": "excluded"
     },
     {
       "type": "library",
@@ -29,16 +28,14 @@
       "name": "javax.servlet-api",
       "version": "3.1.0",
       "purl": "pkg:maven/javax.servlet/javax.servlet-api@3.1.0",
-      "scope": "optional",
-      "description": "TRAP: Container-provided servlet API. Not packaged into distributed fat JAR."
+      "scope": "optional"
     },
     {
       "type": "library",
       "group": "com.internal.fintech",
       "name": "token-authenticator",
       "version": "1.0.0",
-      "purl": "pkg:maven/com.internal.fintech/token-authenticator@1.0.0",
-      "description": "TRAP: Proprietary internal artifact. Scanners matching only artifact ID 'token-authenticator' falsely report vulnerabilities belonging to unrelated public npm/PyPI packages with matching names."
+      "purl": "pkg:maven/com.internal.fintech/token-authenticator@1.0.0"
     }
   ]
 }
