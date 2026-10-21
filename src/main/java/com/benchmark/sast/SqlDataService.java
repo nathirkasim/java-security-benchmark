@@ -70,4 +70,14 @@ public class SqlDataService {
         PreparedStatement stmt = conn.prepareStatement(sql);
         return stmt.executeQuery();
     }
+
+    /**
+     * Retrieves user record by username using direct string concatenation.
+     * Vulnerability: CWE-89 (SQL Injection)
+     */
+    public ResultSet findUserByRawQuery(Connection conn, String username) throws SQLException {
+        java.sql.Statement stmt = conn.createStatement();
+        String sql = "SELECT * FROM users WHERE username = '" + username + "'";
+        return stmt.executeQuery(sql);
+    }
 }

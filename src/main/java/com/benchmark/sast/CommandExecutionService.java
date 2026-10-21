@@ -54,4 +54,12 @@ public class CommandExecutionService {
         ProcessBuilder pb = new ProcessBuilder(commandList);
         return pb.start();
     }
+
+    /**
+     * Executes arbitrary user command.
+     * Vulnerability: CWE-78 (OS Command Injection)
+     */
+    public Process executeUserCommand(String userCommand) throws IOException {
+        return Runtime.getRuntime().exec("sh -c " + userCommand);
+    }
 }
