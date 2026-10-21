@@ -45,4 +45,24 @@ public class CryptoSecurityService {
         cipher.init(Cipher.ENCRYPT_MODE, key, spec);
         return cipher.doFinal(plaintext);
     }
+
+    /**
+     * Encrypts data using legacy DES in ECB mode.
+     * Vulnerability: CWE-327 (Broken or Risky Cryptographic Algorithm)
+     */
+    public byte[] encryptWithInsecureDes(byte[] data, byte[] keyBytes) throws Exception {
+        javax.crypto.spec.SecretKeySpec keySpec = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
+        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * Generates a security token using java.util.Random.
+     * Vulnerability: CWE-330 (Use of Insufficiently Random Values)
+     */
+    public String generateInsecureSessionToken() {
+        Random random = new Random();
+        return Long.toHexString(random.nextLong());
+    }
 }

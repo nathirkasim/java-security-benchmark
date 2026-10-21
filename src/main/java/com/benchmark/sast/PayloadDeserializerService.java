@@ -49,4 +49,15 @@ public class PayloadDeserializerService {
             return vois.readObject();
         }
     }
+
+    /**
+     * Deserializes untrusted object stream directly without filters.
+     * Vulnerability: CWE-502 (Insecure Deserialization)
+     */
+    public Object deserializeUnchecked(byte[] serializedBytes) throws IOException, ClassNotFoundException {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(serializedBytes);
+             ObjectInputStream ois = new ObjectInputStream(bais)) {
+            return ois.readObject();
+        }
+    }
 }
