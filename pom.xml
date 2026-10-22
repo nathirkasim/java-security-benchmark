@@ -71,7 +71,47 @@
             <artifactId>encoder</artifactId>
             <version>1.2.3</version>
         </dependency>
+
+        <!-- Private packages hosted on AWS CodeArtifact -->
+        <dependency>
+            <groupId>com.benchmark.security</groupId>
+            <artifactId>security-audit-logger</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.benchmark.security</groupId>
+            <artifactId>security-token-validator</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>benchmark-codeartifact</id>
+            <name>AWS CodeArtifact Benchmark Repository</name>
+            <url>https://benchmark-domain-589498925148.d.codeartifact.us-east-1.amazonaws.com/maven/benchmark-repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>benchmark-codeartifact</id>
+            <name>AWS CodeArtifact Benchmark Repository</name>
+            <url>https://benchmark-domain-589498925148.d.codeartifact.us-east-1.amazonaws.com/maven/benchmark-repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <plugins>

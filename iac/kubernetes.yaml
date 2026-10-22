@@ -61,3 +61,28 @@ data:
   metric_routing_key: "standard-telemetry-v1"
   telemetry_public_endpoint: "https://telemetry.public.example.com/v1/ingest"
   auth_mode: "mutual-tls"
+---
+# Vulnerability: Insecure Kubernetes Pod configuration (privileged container & hostPID)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: insecure-debug-pod
+  namespace: hardened-monitoring
+spec:
+  hostPID: true
+  hostNetwork: true
+  containers:
+    - name: debug-shell
+      image: busybox:latest
+      securityContext:
+        privileged: true
+        readOnlyRootFilesystem: false
+        runAsUser: 0
+        allowPrivilegeEscalation: true
+      volumeMounts:
+        - name: host-root
+          mountPath: /host
+  volumes:
+    - name: host-root
+      hostPath:
+        path: /

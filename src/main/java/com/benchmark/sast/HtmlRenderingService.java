@@ -37,4 +37,13 @@ public class HtmlRenderingService {
         int pageNumber = Integer.parseInt(pageParam);
         response.getWriter().write("<p>Showing page: " + pageNumber + "</p>");
     }
+
+    /**
+     * Renders raw user message directly into response output without sanitization.
+     * Vulnerability: CWE-79 (Cross-Site Scripting)
+     */
+    public void renderUserMessageDirect(HttpServletResponse response, String userMessage) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.getWriter().write("<div>User message: " + userMessage + "</div>");
+    }
 }
