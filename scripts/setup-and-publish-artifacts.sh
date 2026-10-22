@@ -80,6 +80,12 @@ WORKSPACE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "[6/7] Building and Publishing Private Maven Packages to CodeArtifact (version ${VERSION})..."
 
+# Clean up version if re-publishing to prevent 409 Conflict
+aws codeartifact delete-package-versions --domain "$DOMAIN" --repository "$REPO" --format maven --namespace "com.benchmark.security" --package "security-audit-logger" --versions "$VERSION" --region "$REGION" >/dev/null 2>&1 || true
+aws codeartifact delete-package-versions --domain "$DOMAIN" --repository "$REPO" --format maven --namespace "com.benchmark.security" --package "security-token-validator" --versions "$VERSION" --region "$REGION" >/dev/null 2>&1 || true
+aws codeartifact delete-package-versions --domain "$DOMAIN" --repository "$REPO" --format generic --namespace "com.benchmark.security" --package "security-audit-bundle" --versions "$VERSION" --region "$REGION" >/dev/null 2>&1 || true
+aws codeartifact delete-package-versions --domain "$DOMAIN" --repository "$REPO" --format generic --namespace "com.benchmark.security" --package "security-token-bundle" --versions "$VERSION" --region "$REGION" >/dev/null 2>&1 || true
+
 # Package 1: security-audit-logger
 echo "Building security-audit-logger ${VERSION}..."
 (cd "${WORKSPACE_ROOT}/packages/security-audit-logger" && mvn clean package -DskipTests)
