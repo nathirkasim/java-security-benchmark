@@ -55,10 +55,46 @@ java-security-benchmark/
 
 ---
 
+### 4. AWS CodeArtifact Private Packages (`com.benchmark.security`)
+- **`security-audit-logger`**: Enterprise security audit logger providing CRLF log injection neutralization (CWE-117), structured JSON serialization, and in-memory event tracking.
+- **`security-token-validator`**: Cryptographic token signing and constant-time HMAC-SHA256 signature verification service (CWE-208 protection against timing attacks).
+- **`PrivatePackageIntegrationService`**: Production integration bridging secure token issuance/validation with real-time audit event logging.
+
+---
+
+## AWS CodeArtifact Setup & Publishing
+
+To create the AWS CodeArtifact domain/repository and publish the private packages:
+
+```bash
+# Automated setup and deployment of private packages using AWS CLI & Maven
+./scripts/setup-and-publish-artifacts.sh
+```
+
+### Manual AWS CLI Commands
+
+```bash
+# 1. Create domain and repository
+aws codeartifact create-domain --domain benchmark-domain --region us-east-1
+aws codeartifact create-repository --domain benchmark-domain --repository benchmark-repo --region us-east-1
+
+# 2. Retrieve endpoint and authorization token
+REPO_ENDPOINT=$(aws codeartifact get-repository-endpoint \
+    --domain benchmark-domain --repository benchmark-repo --format maven --region us-east-1 --query repositoryEndpoint --output text)
+CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
+    --domain benchmark-domain --region us-east-1 --query authorizationToken --output text)
+
+# 3. List published packages in CodeArtifact
+aws codeartifact list-packages --domain benchmark-domain --repository benchmark-repo --region us-east-1
+```
+
+---
+
 ## Build & Test
 
 ```bash
-# Compile and run unit tests
+# Fetch authorization token and compile/test against AWS CodeArtifact packages
+export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain benchmark-domain --region us-east-1 --query authorizationToken --output text)
 mvn clean test
 
 # Generate CycloneDX Software Bill of Materials

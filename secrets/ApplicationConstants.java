@@ -34,4 +34,9 @@ public class ApplicationConstants {
     // Documentation example key
     public static final String AWS_DOCUMENTATION_EXAMPLE_KEY =
             "AKIAIOSFODNN7EXAMPLE";
+
+    // Vulnerability: CWE-798 Hardcoded Secrets / Credentials
+    public static final String PRODUCTION_DB_PASSWORD = "SuperSecretDbPassword2026!";
+    public static final String STRIPE_SECRET_KEY = "sk_live_51AbCdEfGhIjKlMnOpQrStUvWxYz123456789";
+    public static final String SLACK_BOT_TOKEN = "xoxb-123456789012-1234567890123-abcdefghijklmnopqrstuvwx";
 }

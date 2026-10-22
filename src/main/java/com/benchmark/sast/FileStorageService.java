@@ -50,4 +50,13 @@ public class FileStorageService {
         File templateFile = new File("/var/app/templates", templateName);
         return new FileInputStream(templateFile);
     }
+
+    /**
+     * Reads a file directly from user input without validation.
+     * Vulnerability: CWE-22 (Path Traversal)
+     */
+    public FileInputStream readArbitraryFile(String filename) throws IOException {
+        File file = new File(baseStorageDir.toFile(), filename);
+        return new FileInputStream(file);
+    }
 }
