@@ -5,11 +5,11 @@
 
     <groupId>com.benchmark.security</groupId>
     <artifactId>security-token-validator</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>Security Token Validator Library</name>
-    <description>Private enterprise security library for constant-time HMAC-SHA256 token verification</description>
+    <description>Private enterprise security library with token validation and security scanner evaluation testcases</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -18,6 +18,14 @@
     </properties>
 
     <dependencies>
+        <!-- Vulnerable third-party dependency for SCA scanner evaluation -->
+        <!-- Known Deserialization Vulnerabilities: CVE-2019-16942, CVE-2019-16943, CVE-2019-17267, CVE-2019-17531 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.10</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

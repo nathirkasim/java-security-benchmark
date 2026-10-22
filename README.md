@@ -55,10 +55,14 @@ java-security-benchmark/
 
 ---
 
-### 4. AWS CodeArtifact Private Packages (`com.benchmark.security`)
-- **`security-audit-logger`**: Enterprise security audit logger providing CRLF log injection neutralization (CWE-117), structured JSON serialization, and in-memory event tracking.
-- **`security-token-validator`**: Cryptographic token signing and constant-time HMAC-SHA256 signature verification service (CWE-208 protection against timing attacks).
-- **`PrivatePackageIntegrationService`**: Production integration bridging secure token issuance/validation with real-time audit event logging.
+### 4. AWS CodeArtifact Private Packages (`com.benchmark.security` v1.1.0)
+- **`security-audit-logger`**:
+  - *Hardened Routines*: CRLF log injection neutralization ([CWE-117](https://cwe.mitre.org/data/definitions/117.html)), structured JSON serialization, and memory audit tracking.
+  - *Vulnerability Testcases*: Log injection via unsanitized raw logging ([CWE-117](https://cwe.mitre.org/data/definitions/117.html)), cleartext credential leakage in logs ([CWE-532](https://cwe.mitre.org/data/definitions/532.html)), arbitrary file path traversal export ([CWE-22](https://cwe.mitre.org/data/definitions/22.html)), SQL query string concatenation ([CWE-89](https://cwe.mitre.org/data/definitions/89.html)), hardcoded credentials ([CWE-798](https://cwe.mitre.org/data/definitions/798.html)), and Apache Commons Text interpolation RCE ([CVE-2022-42889](https://nvd.nist.gov/vuln/detail/CVE-2022-42889) / Text4Shell).
+- **`security-token-validator`**:
+  - *Hardened Routines*: Cryptographic token signing and constant-time HMAC-SHA256 signature verification service ([CWE-208](https://cwe.mitre.org/data/definitions/208.html)).
+  - *Vulnerability Testcases*: Token signature bypass / `alg: none` ([CWE-347](https://cwe.mitre.org/data/definitions/347.html)), non-constant-time byte comparison timing leak ([CWE-208](https://cwe.mitre.org/data/definitions/208.html)), weak MD5 token hash ([CWE-327](https://cwe.mitre.org/data/definitions/327.html)), untrusted object stream deserialization ([CWE-502](https://cwe.mitre.org/data/definitions/502.html)), hardcoded JWT fallback secret ([CWE-798](https://cwe.mitre.org/data/definitions/798.html)), insecure nonce generation via `Random` ([CWE-330](https://cwe.mitre.org/data/definitions/330.html)), and Jackson-databind deserialization vulnerability evaluation ([CVE-2019-16942](https://nvd.nist.gov/vuln/detail/CVE-2019-16942)).
+- **`PrivatePackageIntegrationService`**: Production & security testing integration service invoking the private AWS CodeArtifact packages.
 
 ---
 

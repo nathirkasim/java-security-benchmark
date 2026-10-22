@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class SecurityTokenValidatorTest {
@@ -52,5 +54,45 @@ public class SecurityTokenValidatorTest {
         TokenValidationResult result = validator.validateToken(token, now);
         Assert.assertFalse(result.isValid());
         Assert.assertTrue(result.getErrorMessage().contains("expired"));
+    }
+
+    @Test
+    public void testVulnerableSignatureBypass() {
+        long now = System.currentTimeMillis();
+        TokenPayload payload = new TokenPayload("bypassed-admin", "auth-service", now, now + 60000, "admin:all");
+        String encodedPayload = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(payload.serialize().getBytes(StandardCharsets.UTF_8));
+        String unsignedToken = encodedPayload + ".none";
+
+        TokenValidationResult result = validator.validateTokenInsecureSignatureBypass(unsignedToken);
+        Assert.assertTrue(result.isValid());
+        Assert.assertEquals("bypassed-admin", result.getPayload().getSubject());
+    }
+
+    @Test
+    public void testVulnerableTimingComparison() {
+        byte[] a = new byte[]{1, 2, 3, 4};
+        byte[] b = new byte[]{1, 2, 3, 4};
+        byte[] c = new byte[]{1, 2, 3, 5};
+        Assert.assertTrue(validator.verifySignatureWithTimingVulnerability(a, b));
+        Assert.assertFalse(validator.verifySignatureWithTimingVulnerability(a, c));
+    }
+
+    @Test
+    public void testVulnerableWeakMd5Token() throws Exception {
+        String token = validator.generateWeakMd5Token("test-user", "secret");
+        Assert.assertNotNull(token);
+        Assert.assertEquals(32, token.length()); // MD5 produces 32 hex chars
+    }
+
+    @Test
+    public void testVulnerableDeserialization() throws Exception {
+        String testString = "TestUntrustedPayload";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(testString);
+        }
+        Object result = validator.deserializeUntrustedObjectToken(baos.toByteArray());
+        Assert.assertEquals(testString, result);
     }
 }

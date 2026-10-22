@@ -4,15 +4,25 @@ import com.benchmark.sast.CryptoSecurityService;
 import com.benchmark.security.PrivatePackageIntegrationService;
 import com.benchmark.security.audit.AuditEvent;
 import com.benchmark.security.audit.AuditSeverity;
+import com.benchmark.security.token.TokenPayload;
 import com.benchmark.security.token.TokenValidationResult;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 public class PrivatePackageIntegrationTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     private PrivatePackageIntegrationService service;
     private byte[] secretKey;
@@ -85,5 +95,61 @@ public class PrivatePackageIntegrationTest {
         Assert.assertNotNull(audit);
         Assert.assertEquals(AuditSeverity.INFO, audit.getSeverity());
         Assert.assertEquals("AES_GCM_ENCRYPT", audit.getAction());
+    }
+
+    @Test
+    public void testVulnerableLogInjectionAndCredentialLeak() {
+        // Exercise CWE-117 and CWE-532
+        service.triggerVulnerableLogInjection("admin\r\nINJECTED", "FORGE_LOG", "Unsanitized log data\r\n");
+        service.triggerCredentialLeakLogging("admin_user", "PlainTextP@ss123", "bearer_token_xyz", "api_key_secret_456");
+    }
+
+    @Test
+    public void testVulnerableSignatureBypass() {
+        // Exercise CWE-347 signature bypass
+        long now = System.currentTimeMillis();
+        TokenPayload payload = new TokenPayload("bypass-root", "auth", now, now + 60000, "all");
+        String encodedPayload = Base64.getUrlEncoder().withoutPadding().encodeToString(payload.serialize().getBytes(StandardCharsets.UTF_8));
+        String unsignedToken = encodedPayload + ".none";
+
+        TokenValidationResult result = service.validateTokenWithInsecureBypass(unsignedToken);
+        Assert.assertTrue(result.isValid());
+        Assert.assertEquals("bypass-root", result.getPayload().getSubject());
+    }
+
+    @Test
+    public void testVulnerableTimingAndMd5() throws Exception {
+        // Exercise CWE-208 and CWE-327
+        byte[] a = new byte[]{10, 20, 30};
+        byte[] b = new byte[]{10, 20, 30};
+        Assert.assertTrue(service.validateTokenWithTimingVulnerability(a, b));
+
+        String md5Token = service.generateInsecureMd5Token("test-user", "test-secret");
+        Assert.assertEquals(32, md5Token.length());
+
+        long weakNonce = service.generateWeakNonce();
+        Assert.assertNotNull(weakNonce);
+    }
+
+    @Test
+    public void testVulnerableDeserialization() throws Exception {
+        // Exercise CWE-502
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject("UnsafeSerializedDataPayload");
+        }
+        Object deserialized = service.deserializeUntrustedTokenStream(baos.toByteArray());
+        Assert.assertEquals("UnsafeSerializedDataPayload", deserialized);
+    }
+
+    @Test
+    public void testVulnerablePathTraversalAndText4Shell() throws Exception {
+        // Exercise CWE-22 and CVE-2022-42889
+        File logDir = tempFolder.newFolder("audit_test_dir");
+        File exported = service.triggerPathTraversalExport(logDir.getAbsolutePath(), "audit_report.txt", "vulnerable content");
+        Assert.assertTrue(exported.exists());
+
+        String evaluated = service.triggerText4ShellEvaluation("User is ${base64Decoder:YWRtaW4=}");
+        Assert.assertTrue(evaluated.contains("admin"));
     }
 }

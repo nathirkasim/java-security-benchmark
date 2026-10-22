@@ -5,9 +5,10 @@ DOMAIN="benchmark-domain"
 REPO="benchmark-repo"
 REGION="us-east-1"
 ACCOUNT_ID="589498925148"
+VERSION="1.1.0"
 
 echo "=========================================================="
-echo " AWS CodeArtifact Setup & Private Package Publishing"
+echo " AWS CodeArtifact Setup & Vulnerable Package Publishing"
 echo "=========================================================="
 
 # 1. Verify AWS Identity
@@ -77,55 +78,55 @@ EOF
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-echo "[6/7] Building and Publishing Private Maven Packages to CodeArtifact..."
+echo "[6/7] Building and Publishing Private Maven Packages to CodeArtifact (version ${VERSION})..."
 
 # Package 1: security-audit-logger
-echo "Building security-audit-logger..."
+echo "Building security-audit-logger ${VERSION}..."
 (cd "${WORKSPACE_ROOT}/packages/security-audit-logger" && mvn clean package -DskipTests)
 
-echo "Deploying security-audit-logger:1.0.0 to CodeArtifact..."
+echo "Deploying security-audit-logger:${VERSION} to CodeArtifact..."
 mvn -s ~/.m2/settings.xml deploy:deploy-file \
-    -Dfile="${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-1.0.0.jar" \
+    -Dfile="${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-${VERSION}.jar" \
     -DpomFile="${WORKSPACE_ROOT}/packages/security-audit-logger/pom.xml" \
     -DrepositoryId=benchmark-codeartifact \
     -Durl="${REPO_ENDPOINT}"
 
 # Package 2: security-token-validator
-echo "Building security-token-validator..."
+echo "Building security-token-validator ${VERSION}..."
 (cd "${WORKSPACE_ROOT}/packages/security-token-validator" && mvn clean package -DskipTests)
 
-echo "Deploying security-token-validator:1.0.0 to CodeArtifact..."
+echo "Deploying security-token-validator:${VERSION} to CodeArtifact..."
 mvn -s ~/.m2/settings.xml deploy:deploy-file \
-    -Dfile="${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-1.0.0.jar" \
+    -Dfile="${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-${VERSION}.jar" \
     -DpomFile="${WORKSPACE_ROOT}/packages/security-token-validator/pom.xml" \
     -DrepositoryId=benchmark-codeartifact \
     -Durl="${REPO_ENDPOINT}"
 
-# Optional: Also publish generic package assets using AWS CLI publish-package-version
+# Publish generic package assets using AWS CLI publish-package-version
 echo "Publishing generic assets via AWS CLI publish-package-version..."
-AUDIT_SHA256=$(sha256sum "${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-1.0.0.jar" | awk '{print $1}')
+AUDIT_SHA256=$(sha256sum "${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-${VERSION}.jar" | awk '{print $1}')
 aws codeartifact publish-package-version \
     --domain "$DOMAIN" \
     --repository "$REPO" \
     --format generic \
     --namespace "com.benchmark.security" \
     --package "security-audit-bundle" \
-    --package-version "1.0.0" \
-    --asset-content "${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-1.0.0.jar" \
-    --asset-name "security-audit-logger-1.0.0.jar" \
+    --package-version "${VERSION}" \
+    --asset-content "${WORKSPACE_ROOT}/packages/security-audit-logger/target/security-audit-logger-${VERSION}.jar" \
+    --asset-name "security-audit-logger-${VERSION}.jar" \
     --asset-sha256 "$AUDIT_SHA256" \
     --region "$REGION" >/dev/null
 
-TOKEN_SHA256=$(sha256sum "${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-1.0.0.jar" | awk '{print $1}')
+TOKEN_SHA256=$(sha256sum "${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-${VERSION}.jar" | awk '{print $1}')
 aws codeartifact publish-package-version \
     --domain "$DOMAIN" \
     --repository "$REPO" \
     --format generic \
     --namespace "com.benchmark.security" \
     --package "security-token-bundle" \
-    --package-version "1.0.0" \
-    --asset-content "${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-1.0.0.jar" \
-    --asset-name "security-token-validator-1.0.0.jar" \
+    --package-version "${VERSION}" \
+    --asset-content "${WORKSPACE_ROOT}/packages/security-token-validator/target/security-token-validator-${VERSION}.jar" \
+    --asset-name "security-token-validator-${VERSION}.jar" \
     --asset-sha256 "$TOKEN_SHA256" \
     --region "$REGION" >/dev/null
 
@@ -134,5 +135,5 @@ echo "[7/7] Verifying Published Packages in CodeArtifact..."
 aws codeartifact list-packages --domain "$DOMAIN" --repository "$REPO" --region "$REGION"
 
 echo "=========================================================="
-echo " Successfully published packages to AWS CodeArtifact!"
+echo " Successfully published version ${VERSION} to AWS CodeArtifact!"
 echo "=========================================================="

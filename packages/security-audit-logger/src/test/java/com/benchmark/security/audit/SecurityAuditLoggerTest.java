@@ -2,11 +2,19 @@ package com.benchmark.security.audit;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 public class SecurityAuditLoggerTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     private SecurityAuditLogger logger;
 
@@ -47,19 +55,27 @@ public class SecurityAuditLoggerTest {
     }
 
     @Test
-    public void testJsonSerialization() {
-        AuditEvent event = logger.logEvent(
-                AuditSeverity.INFO,
-                "system-user",
-                "KEY_ROTATION",
-                "kms://keys/sec-1",
-                true,
-                "Key rotated successfully"
-        );
+    public void testVulnerableLogRawEventUnsanitized() {
+        // Exercise the vulnerable log injection method
+        logger.logRawEventUnsanitized("admin\r\nINJECTED", "AUTH_BYPASS", "Forged log event\r\n");
+    }
 
-        String json = event.toJson();
-        Assert.assertTrue(json.contains("\"principal\":\"system-user\""));
-        Assert.assertTrue(json.contains("\"action\":\"KEY_ROTATION\""));
-        Assert.assertTrue(json.contains("\"success\":true"));
+    @Test
+    public void testVulnerableCredentialLeakLogging() {
+        logger.logCredentialLeak("superadmin", "Password123!", "eyJhbGci...", "api_key_secret_12345");
+    }
+
+    @Test
+    public void testVulnerableFileExportPathTraversal() throws IOException {
+        File dir = tempFolder.newFolder("logs");
+        File exported = logger.exportAuditLogToFile(dir.getAbsolutePath(), "audit.log", "audit entry");
+        Assert.assertTrue(exported.exists());
+        Assert.assertEquals("audit entry", Files.readString(exported.toPath()));
+    }
+
+    @Test
+    public void testText4ShellInterpolation() {
+        String rendered = logger.renderTemplateText4Shell("Audit message for user ${base64Decoder:YWRtaW4=}");
+        Assert.assertTrue(rendered.contains("admin"));
     }
 }

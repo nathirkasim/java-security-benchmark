@@ -8,13 +8,20 @@ import com.benchmark.security.token.SecurityTokenValidator;
 import com.benchmark.security.token.TokenPayload;
 import com.benchmark.security.token.TokenValidationResult;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
  * Service integrating private security packages hosted on AWS CodeArtifact:
- * 1. com.benchmark.security:security-audit-logger (CRLF-safe audit logging)
- * 2. com.benchmark.security:security-token-validator (Constant-time HMAC token validation)
+ * 1. com.benchmark.security:security-audit-logger (v1.1.0)
+ * 2. com.benchmark.security:security-token-validator (v1.1.0)
+ *
+ * Exposes both production routines and intentionally vulnerable entrypoints
+ * designed for AST, SAST, SCA, and SBOM security scanning validation.
  */
 public class PrivatePackageIntegrationService {
 
@@ -88,6 +95,86 @@ public class PrivatePackageIntegrationService {
     public AuditEvent auditOperation(AuditSeverity severity, String principal, String action,
                                      String resource, boolean success, String message) {
         return auditLogger.logEvent(severity, principal, action, resource, success, message);
+    }
+
+    // =========================================================================
+    // Vulnerable Package Integration Entrypoints (for Security Tool Evaluation)
+    // =========================================================================
+
+    /**
+     * Calls vulnerable CWE-117 (Log Injection) in private package security-audit-logger.
+     */
+    public void triggerVulnerableLogInjection(String principal, String action, String untrustedMessage) {
+        auditLogger.logRawEventUnsanitized(principal, action, untrustedMessage);
+    }
+
+    /**
+     * Calls vulnerable CWE-532 (Cleartext Credential Leakage) in private package security-audit-logger.
+     */
+    public void triggerCredentialLeakLogging(String username, String password, String token, String apiKey) {
+        auditLogger.logCredentialLeak(username, password, token, apiKey);
+    }
+
+    /**
+     * Calls vulnerable CWE-22 (Path Traversal File Write) in private package security-audit-logger.
+     */
+    public File triggerPathTraversalExport(String targetDir, String filename, String content) throws IOException {
+        return auditLogger.exportAuditLogToFile(targetDir, filename, content);
+    }
+
+    /**
+     * Calls vulnerable CWE-89 (SQL Injection) in private package security-audit-logger.
+     */
+    public void triggerSqlInjectionPersistence(Connection conn, String eventId, String principal, String action, String message)
+            throws SQLException {
+        auditLogger.persistAuditRecordSqlInjection(conn, eventId, principal, action, message);
+    }
+
+    /**
+     * Calls vulnerable CVE-2022-42889 / CWE-1336 (Text4Shell RCE) in private package security-audit-logger.
+     */
+    public String triggerText4ShellEvaluation(String template) {
+        return auditLogger.renderTemplateText4Shell(template);
+    }
+
+    /**
+     * Calls vulnerable CWE-347 (Improper Signature Verification / Alg None Bypass) in private package security-token-validator.
+     */
+    public TokenValidationResult validateTokenWithInsecureBypass(String token) {
+        SecurityTokenValidator validator = new SecurityTokenValidator();
+        return validator.validateTokenInsecureSignatureBypass(token);
+    }
+
+    /**
+     * Calls vulnerable CWE-208 (Timing Attack on HMAC Signature) in private package security-token-validator.
+     */
+    public boolean validateTokenWithTimingVulnerability(byte[] expectedSig, byte[] actualSig) {
+        SecurityTokenValidator validator = new SecurityTokenValidator();
+        return validator.verifySignatureWithTimingVulnerability(expectedSig, actualSig);
+    }
+
+    /**
+     * Calls vulnerable CWE-327 (Weak MD5 Digest) in private package security-token-validator.
+     */
+    public String generateInsecureMd5Token(String subject, String secret) throws GeneralSecurityException {
+        SecurityTokenValidator validator = new SecurityTokenValidator();
+        return validator.generateWeakMd5Token(subject, secret);
+    }
+
+    /**
+     * Calls vulnerable CWE-502 (Untrusted Object Deserialization) in private package security-token-validator.
+     */
+    public Object deserializeUntrustedTokenStream(byte[] payload) throws Exception {
+        SecurityTokenValidator validator = new SecurityTokenValidator();
+        return validator.deserializeUntrustedObjectToken(payload);
+    }
+
+    /**
+     * Calls vulnerable CWE-330 (Insecure Randomness) in private package security-token-validator.
+     */
+    public long generateWeakNonce() {
+        SecurityTokenValidator validator = new SecurityTokenValidator();
+        return validator.generateInsecureRandomNonce();
     }
 
     /**
