@@ -65,4 +65,41 @@ public class CryptoSecurityService {
         Random random = new Random();
         return Long.toHexString(random.nextLong());
     }
+
+    /**
+     * Generates an authenticated, tamper-proof session token using the private CodeArtifact package.
+     */
+    public String generateSecureSessionToken(String subject, String issuer, long validitySeconds, byte[] secretKey)
+            throws Exception {
+        long now = System.currentTimeMillis();
+        com.benchmark.security.token.TokenPayload payload = new com.benchmark.security.token.TokenPayload(
+                subject, issuer, now, now + (validitySeconds * 1000), "secure-session"
+        );
+        return com.benchmark.security.token.HmacTokenSigner.signToken(payload, secretKey);
+    }
+
+    /**
+     * Validates a signed session token using constant-time verification from the private CodeArtifact package.
+     */
+    public com.benchmark.security.token.TokenValidationResult validateSessionToken(String token, byte[] secretKey) {
+        com.benchmark.security.token.SecurityTokenValidator validator =
+                new com.benchmark.security.token.SecurityTokenValidator(secretKey);
+        return validator.validateToken(token);
+    }
+
+    /**
+     * Audits cryptographic operations using the private security-audit-logger package.
+     */
+    public com.benchmark.security.audit.AuditEvent auditCryptoOperation(String operation, String principal, boolean success, String details) {
+        com.benchmark.security.audit.SecurityAuditLogger logger =
+                new com.benchmark.security.audit.SecurityAuditLogger("CRYPTO_SERVICE");
+        return logger.logEvent(
+                success ? com.benchmark.security.audit.AuditSeverity.INFO : com.benchmark.security.audit.AuditSeverity.SECURITY_ALERT,
+                principal,
+                operation,
+                "crypto://engine",
+                success,
+                details
+        );
+    }
 }
